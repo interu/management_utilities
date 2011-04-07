@@ -6,7 +6,7 @@
 require 'pit'
 
 timestamp = Date.today.strftime('%Y%m%d')
-pit = Pit.get('s3', :require => { 'access_key' => '', 'secret_key' => '', 'region' => '', 'bucket' => ''})
+pit_s3 = Pit.get('s3', :require => { 'access_key' => '', 'secret_key' => '', 'region' => '', 'bucket' => ''})
 pit_gmail = Pit.get('gmail', :require => { 'to' => '', 'from' => '', 'password' => ''})
 
 Backup::Model.new(:system, 'system log buckup') do
