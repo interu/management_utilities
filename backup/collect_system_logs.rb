@@ -5,8 +5,9 @@
 
 require 'pit'
 
-pit = Pit.get('s3_info', :require => { 'access_key' => '', 'secret_key' => '', 'region' => '', 'bucket' => ''})
 timestamp = Date.today.strftime('%Y%m%d')
+pit = Pit.get('s3', :require => { 'access_key' => '', 'secret_key' => '', 'region' => '', 'bucket' => ''})
+pit_gmail = Pit.get('gmail', :require => { 'to' => '', 'from' => '', 'password' => ''})
 
 Backup::Model.new(:system, 'system log buckup') do
   archive :logs do |archive|
@@ -29,11 +30,26 @@ Backup::Model.new(:system, 'system log buckup') do
   end
 
   store_with S3 do |s3|
-    s3.access_key_id      = pit['access_key']
-    s3.secret_access_key  = pit['secret_key']
-    s3.region             = pit['region']
-    s3.bucket             = pit['bucket']
+    s3.access_key_id      = pit_s3['access_key']
+    s3.secret_access_key  = pit_s3['secret_key']
+    s3.region             = pit_s3['region']
+    s3.bucket             = pit_s3['bucket']
     s3.path               = '/backups'
     s3.keep               = 365
+  end
+
+  notify_by Mail do |mail|
+    mail.on_success           = false
+    mail.on_failure           = true
+
+    mail.from                 = pit_gmail['from']
+    mail.to                   = pit_gmail['to']
+    mail.address              = 'smtp.gmail.com'
+    mail.port                 = 587
+    mail.domain               = 'smtp.gmail.com'
+    mail.user_name            = pit_gmail['from']
+    mail.password             = pit_gmail['password']
+    mail.authentication       = 'plain'
+    mail.enable_starttls_auto = true
   end
 end
