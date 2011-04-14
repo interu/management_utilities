@@ -2,7 +2,7 @@ require 'rubygems'
 require 'right_aws'
 require 'pit'
 
-pit = Pit.get('s3_info', :require => { 'access_key' => '', 'secret_key' => '', 'volume_id' => '', 'owner_id' => '', 'region' => '', 'app_title' => ''})
+pit = Pit.get('s3', :require => { 'access_key' => '', 'secret_key' => '', 'volume_id' => '', 'owner_id' => '', 'region' => '', 'app_title' => ''})
 
 access_key  = pit['access_key']
 secret_key  = pit['secret_key']
