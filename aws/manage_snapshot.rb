@@ -1,39 +1,57 @@
 require 'rubygems'
 require 'right_aws'
+require "active_support/time"
 require 'pit'
 
-pit = Pit.get('s3', :require => { 'access_key' => '', 'secret_key' => '', 'volume_id' => '', 'owner_id' => '', 'region' => '', 'app_title' => ''})
+class ManageSnapshot
+  @@pit = Pit.get('s3', :require => { 'access_key' => '', 'secret_key' => '', 'volume_id' => '', 'owner_id' => '', 'region' => '', 'app_title' => ''})
 
-access_key  = pit['access_key']
-secret_key  = pit['secret_key']
-volume_id   = pit['volume_id']
-owner_id    = pit['owner_id']
-region      = pit['region']
-description = pit['app_title']
-generation  = 7
+  attr_accessor :access_key, :secret_key, :volume_id, :owner_id, :region, :description, :long_period, :short_period
 
-
-begin
-  @ec2 = RightAws::Ec2.new(access_key, secret_key, {:region => region})
-
-  ## Create Snapshot
-  puts "--------- Create Snapshot ---------"
-  @ec2.create_snapshot(volume_id, description)
-
-  #puts "--------- Describe Snapshot ---------"
-  all_snapshots = @ec2.describe_snapshots
-
-  snapshots = all_snapshots.select{|snapshot| snapshot[:aws_owner] == owner_id and snapshot[:aws_description] == description}.sort{|x,y| x[:aws_started_at] <=> y[:aws_started_at]}
-
-  target_snapshot = snapshots.size > generation ? snapshots.first : nil
-  puts "--------- Delete Snapshot ---------"
-  puts target_snapshot.inspect
-
-  # Delete Old Snapshot
-  unless target_snapshot.empty?
-    @ec2.delete_snapshot(target_snapshot[:aws_id])
+  def self.run
+    self.new.run
   end
 
-rescue
-end
+  def initialize(opt = {})
+    @access_key  = opt[:access_key] || @@pit['access_key']
+    @secret_key  = opt[:secret_key] || @@pit['secret_key']
+    @volume_id   = opt[:volume_id] || @@pit['volume_id']
+    @owner_id    = opt[:owner_id] || @@pit['owner_id']
+    @region      = opt[:region] || @@pit['region']
+    @description = opt[:description] || @@pit['app_title']
+    @long_period = opt[:long_period] || 12.hour
+    @short_period = opt[:short_period] || 2.hour
+  end
 
+  def ec2
+    @ec2 ||= RightAws::Ec2.new(access_key, secret_key, {:region => region})
+  end
+
+  def run
+    create_snapshot
+    delete_snapshot
+  rescue => e
+    puts "--------- Error ---------"
+    puts e
+  end
+
+  def create_snapshot
+    ec2.create_snapshot(volume_id, description)
+  end
+
+  def delete_snapshot(snapshots = select_snapshot_to_delete)
+    snapshots.each do |snapshot|
+      ec2.delete_snapshot(snapshot[:aws_id])
+    end
+  end
+
+  def select_snapshot_to_delete(snapshots = select_owners_and_same_description_snapshots)
+    snapshots.
+      select { |ss| ss[:aws_started_at] >= long_period.ago }.
+      select { |ss| short_period.ago < ss[:aws_started_at] and ss[:aws_started_at] <= long_period.ago and 10 < ss[:aws_started_at].min }
+  end
+
+  def select_owners_and_same_description_snapshots
+    ec2.describe_snapshots.select{ |snapshot| snapshot[:aws_owner] == owner_id and snapshot[:aws_description] == description }
+  end
+end
