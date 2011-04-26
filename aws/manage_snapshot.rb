@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'rubygems'
 require 'right_aws'
 require "active_support/time"
@@ -30,9 +32,6 @@ class ManageSnapshot
   def run
     create_snapshot
     delete_snapshot
-  rescue => e
-    puts "--------- Error ---------"
-    puts e
   end
 
   def create_snapshot
@@ -53,5 +52,45 @@ class ManageSnapshot
 
   def select_owners_and_same_description_snapshots
     ec2.describe_snapshots.select{ |snapshot| snapshot[:aws_owner] == owner_id and snapshot[:aws_description] == description }
+  end
+end
+
+if __FILE__ == $0
+  begin
+    ManageSnapshot.run
+  rescue => e
+    require "mail"
+
+    pit_gmail = Pit.get('gmail', :require => { 'to' => '', 'from' => '', 'password' => ''})
+
+    Mail.defaults do
+      delivery_method :smtp, {
+        :address              => "smtp.gmail.com",
+        :port                 => 587,
+        :domain               => 'smtp.gmail.com',
+        :user_name            => pit_gmail['from'],
+        :password             => pit_gmail['password'],
+        :authentication       => 'plain',
+        :enable_starttls_auto => true
+      }
+      # For test mail
+      # delivery_method :test
+    end
+
+    Mail.deliver do |mail|
+      to pit_gmail['to']
+      from pit_gmail['from']
+      subject "[Error] Manage Snapshot Error"
+      body <<-EOF
+Manage Snapshot Error
+
+Error:
+#{e}
+
+Backtrace:
+#{e.backtrace.join('
+')}
+EOF
+    end
   end
 end
