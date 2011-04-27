@@ -2,7 +2,7 @@
 
 require 'rubygems'
 require 'right_aws'
-require "active_support/time"
+require 'active_support'
 require 'pit'
 
 class ManageSnapshot
@@ -31,11 +31,17 @@ class ManageSnapshot
 
   def run
     create_snapshot
+    check_status_snapshot
     delete_snapshot
   end
 
   def create_snapshot
     ec2.create_snapshot(volume_id, description)
+  end
+
+  def check_status_snapshot(snapshots = select_owners_and_same_description_snapshots)
+    result = snapshots.select{ |ss| ss[:aws_status] == "pending" }
+    raise "pending status count : #{result.count}" if result.count >= 2
   end
 
   def delete_snapshot(snapshots = select_snapshot_to_delete)
@@ -45,9 +51,10 @@ class ManageSnapshot
   end
 
   def select_snapshot_to_delete(snapshots = select_owners_and_same_description_snapshots)
-    snapshots.
-      select { |ss| ss[:aws_started_at] >= long_period.ago }.
-      select { |ss| short_period.ago < ss[:aws_started_at] and ss[:aws_started_at] <= long_period.ago and 10 < ss[:aws_started_at].min }
+    target = []
+    target << snapshots.select { |ss| ss[:aws_started_at] <= long_period.ago }
+    target << snapshots.select { |ss| short_period.ago > ss[:aws_started_at] and ss[:aws_started_at] >= long_period.ago and 10 < ss[:aws_started_at].min }
+    target.flatten
   end
 
   def select_owners_and_same_description_snapshots
@@ -60,6 +67,7 @@ if __FILE__ == $0
     ManageSnapshot.run
   rescue => e
     require "mail"
+    require 'i18n'
 
     pit_gmail = Pit.get('gmail', :require => { 'to' => '', 'from' => '', 'password' => ''})
 

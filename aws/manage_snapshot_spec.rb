@@ -1,6 +1,6 @@
 require "rubygems"
 require "spec"
-require "active_support/time"
+require "active_support"
 require "./manage_snapshot"
 
 describe ManageSnapshot, "#create_snapshot" do
@@ -10,6 +10,22 @@ describe ManageSnapshot, "#create_snapshot" do
     ec2.should_receive(:create_snapshot).with("volume1", "volume1 desc")
     runner.stub(:ec2).and_return(ec2)
     runner.create_snapshot
+  end
+end
+
+describe ManageSnapshot, "#check_status_snapshot" do
+  before do
+    @runner = ManageSnapshot.new
+  end
+
+  it "should not select 2 snapshots that status is pending" do
+    @snapshots = [{ :aws_status => "pending" }, { :aws_status => "completed" }]
+    proc{ @runner.check_status_snapshot(@snapshots) }.should_not raise_error
+  end
+
+  it "should select 2 snapshots that status is pending" do
+    @snapshots = [{ :aws_status => "pending" }, { :aws_status => "pending" }]
+    proc{ @runner.check_status_snapshot(@snapshots) }.should raise_error
   end
 end
 
@@ -45,13 +61,13 @@ describe ManageSnapshot, "#select_snapshot_to_delete" do
   it "should select volume that is older than 12hour" do
     @old_snapshot = { :aws_started_at => 15.hour.ago }
     @snapshots << @old_snapshot
-    should_not include(@old_snapshot)
+    should include(@old_snapshot)
   end
 
   it "should select volume that is not every hour and since 12hour" do
     @not_hourly_snapshot = { :aws_started_at => 6.hour.ago.change(:min => 15) }
     @snapshots << @not_hourly_snapshot
-    should_not include(@not_hourly_snapshot)
+    should include(@not_hourly_snapshot)
   end
 end
 
