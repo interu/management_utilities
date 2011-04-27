@@ -2,7 +2,7 @@
 
 require 'rubygems'
 require 'right_aws'
-require 'active_support'
+require 'active_support/time' ## activesupport v3
 require 'pit'
 
 class ManageSnapshot
@@ -52,8 +52,8 @@ class ManageSnapshot
 
   def select_snapshot_to_delete(snapshots = select_owners_and_same_description_snapshots)
     target = []
-    target << snapshots.select { |ss| ss[:aws_started_at] <= long_period.ago }
-    target << snapshots.select { |ss| short_period.ago > ss[:aws_started_at] and ss[:aws_started_at] >= long_period.ago and 10 < ss[:aws_started_at].min }
+    target << snapshots.select { |ss| Time.parse(ss[:aws_started_at]) <= long_period.ago }
+    target << snapshots.select { |ss| short_period.ago > Time.parse(ss[:aws_started_at]) and Time.parse(ss[:aws_started_at]) >= long_period.ago and 10 < Time.parse(ss[:aws_started_at]).min }
     target.flatten
   end
 

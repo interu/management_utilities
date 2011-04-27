@@ -49,23 +49,23 @@ describe ManageSnapshot, "#select_snapshot_to_delete" do
   subject { @runner.select_snapshot_to_delete(@snapshots) }
 
   it "should not select recent 2hour volume" do
-    @new_snapshot = { :aws_started_at => 1.hour.ago }
+    @new_snapshot = { :aws_started_at => 1.hour.ago.to_s }
     @snapshots << @new_snapshot
     should_not include(@new_snapshot)
   end
   it "should not select every hour volume that is since 12hour" do
-    @hourly_snapshot = { :aws_started_at => 6.hour.ago.change(:min => 4) }
+    @hourly_snapshot = { :aws_started_at => 6.hour.ago.change(:min => 4).to_s }
     @snapshots << @hourly_snapshot
     should_not include(@hourly_snapshot)
   end
   it "should select volume that is older than 12hour" do
-    @old_snapshot = { :aws_started_at => 15.hour.ago }
+    @old_snapshot = { :aws_started_at => 15.hour.ago.to_s }
     @snapshots << @old_snapshot
     should include(@old_snapshot)
   end
 
   it "should select volume that is not every hour and since 12hour" do
-    @not_hourly_snapshot = { :aws_started_at => 6.hour.ago.change(:min => 15) }
+    @not_hourly_snapshot = { :aws_started_at => 6.hour.ago.change(:min => 15).to_s }
     @snapshots << @not_hourly_snapshot
     should include(@not_hourly_snapshot)
   end
