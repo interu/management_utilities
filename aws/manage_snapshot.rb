@@ -65,7 +65,7 @@ end
 if __FILE__ == $0
   begin
     ManageSnapshot.run
-  rescue => e
+  rescue Exception => e
     require "mail"
     require 'i18n'
 
