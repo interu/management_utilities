@@ -88,7 +88,7 @@ if __FILE__ == $0
     Mail.deliver do |mail|
       to pit_gmail['to']
       from pit_gmail['from']
-      subject "[Error] Manage Snapshot Error"
+      subject "[#{description}] Manage Snapshot Error"
       body <<-EOF
 Manage Snapshot Error
 
