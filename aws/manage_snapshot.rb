@@ -70,6 +70,7 @@ if __FILE__ == $0
     require 'i18n'
 
     pit_gmail = Pit.get('gmail', :require => { 'to' => '', 'from' => '', 'password' => ''})
+    pit_s3 = Pit.get('s3', :require => { 'app_title' => ''})
 
     Mail.defaults do
       delivery_method :smtp, {
@@ -88,7 +89,7 @@ if __FILE__ == $0
     Mail.deliver do |mail|
       to pit_gmail['to']
       from pit_gmail['from']
-      subject "[#{description}] Manage Snapshot Error"
+      subject "[#{pit_s3['app_title']}] Manage Snapshot Error"
       body <<-EOF
 Manage Snapshot Error
 
