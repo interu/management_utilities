@@ -18,6 +18,7 @@ class ManageSnapshot
   end
 
   def initialize(opt = {})
+    config = MyConfiguration.new
     @access_key  = opt[:access_key]    || config.aws['access_key']
     @secret_key  = opt[:secret_key]    || config.aws['secret_key']
     @owner_id    = opt[:owner_id]      || config.aws['owner_id']

@@ -11,6 +11,8 @@ ebs:
 ami:
   instance_id:
   regist_key:
+s3:
+  bucket:
 gmail:
   from:
   to:
