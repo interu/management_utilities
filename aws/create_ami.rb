@@ -18,6 +18,7 @@ class CreateAmi
   end
 
   def initialize(opt = {})
+    config = MyConfiguration.new
     @access_key  = opt[:access_key]    || config.aws['access_key']
     @secret_key  = opt[:secret_key]    || config.aws['secret_key']
     @region      = opt[:region]        || config.aws['region']
@@ -35,6 +36,7 @@ class CreateAmi
 
   def create_ami
     if valid_instance?
+      puts "[OK] Start registing #{registing_name} ..."
       ec2.crate_image(instance_id, {:name => registing_name, :no_reboot => true})
     else
       puts "[Error] Instance ID was different."
@@ -47,7 +49,7 @@ class CreateAmi
 
   def valid_instance?
     metadata = `curl -s http://169.254.169.254/latest/meta-data/instance-id`
-    matadata == instance_id
+    metadata == instance_id
   end
 end
 
