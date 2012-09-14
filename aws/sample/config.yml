@@ -1,0 +1,17 @@
+---
+app_name:
+aws:
+  access_key:
+  secret_key:
+  owner_id:
+  region:
+ebs:
+  volume_id:
+  description:
+ami:
+  instance_id:
+  regist_key:
+gmail:
+  from:
+  to:
+  password:

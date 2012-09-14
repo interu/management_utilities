@@ -3,11 +3,14 @@
 require 'rubygems'
 require 'right_aws'
 require 'active_support/time' ## activesupport v3
-require 'pit'
+require 'constellation'
+
+class MyConfiguration
+  Constellation.enhance self
+  self.config_file = "~/.config.yml"
+end
 
 class CreateAmi
-  @@pit = Pit.get('s3', :require => { 'access_key' => '', 'secret_key' => '', 'instance_id' => '', 'region' => '', 'regist_key' => ''})
-
   attr_accessor :access_key, :secret_key, :instance_id, :region, :regist_key
 
   def self.run
@@ -15,11 +18,11 @@ class CreateAmi
   end
 
   def initialize(opt = {})
-    @access_key  = opt[:access_key] || @@pit['access_key']
-    @secret_key  = opt[:secret_key] || @@pit['secret_key']
-    @instance_id = opt[:instance_id] || @@pit['instance_id']
-    @region      = opt[:region] || @@pit['region']
-    @regist_key  = opt[:regist_key] || @@pit['regist_key']
+    @access_key  = opt[:access_key]    || config.aws['access_key']
+    @secret_key  = opt[:secret_key]    || config.aws['secret_key']
+    @region      = opt[:region]        || config.aws['region']
+    @instance_id = opt[:instance_id]   || config.ami['instance_id']
+    @regist_key  = opt[:regist_key]    || config.ami['regist_key']
   end
 
   def ec2
@@ -49,22 +52,20 @@ class CreateAmi
 end
 
 if __FILE__ == $0
+  config = MyConfiguration.new
   begin
     CreateAmi.run
   rescue Exception => e
     require "mail"
     require 'i18n'
 
-    pit_gmail = Pit.get('gmail', :require => { 'to' => '', 'from' => '', 'password' => ''})
-    pit_s3 = Pit.get('s3', :require => { 'app_title' => ''})
-
     Mail.defaults do
       delivery_method :smtp, {
         :address              => "smtp.gmail.com",
         :port                 => 587,
         :domain               => 'smtp.gmail.com',
-        :user_name            => pit_gmail['from'],
-        :password             => pit_gmail['password'],
+        :user_name            => config.gmail['from'],
+        :password             => config.gmail['password'],
         :authentication       => 'plain',
         :enable_starttls_auto => true
       }
@@ -73,9 +74,9 @@ if __FILE__ == $0
     end
 
     Mail.deliver do |mail|
-      to pit_gmail['to']
-      from pit_gmail['from']
-      subject "[#{pit_s3['app_title']}] Manage Snapshot Error"
+      to config.gmail['to']
+      from config.gmail['from']
+      subject "[#{config.app_name}] Manage Snapshot Error"
       body <<-EOF
 Manage Snapshot Error
 
