@@ -37,7 +37,7 @@ class CreateAmi
   def create_ami
     if valid_instance?
       puts "[OK] Start registing #{registing_name} ..."
-      ec2.crate_image(instance_id, {:name => registing_name, :no_reboot => true})
+      ec2.create_image(instance_id, {:name => registing_name, :no_reboot => true})
     else
       puts "[Error] Instance ID was different."
     end
