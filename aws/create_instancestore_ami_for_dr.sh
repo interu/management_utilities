@@ -55,7 +55,7 @@ echo "--------------------------"
 echo "--------------------------"
 echo "Execute ec2-migrate-manifest ..."
 echo "--------------------------"
-ec2-migrate-manifest --privatekey ${PK_PEM_PATH} -cert ${CERT_PEM_PATH} --access-key ${ACCESS_KEY} --secret-key ${SECRET_KEY} --manifest image.manifest.xml --kernel ${DR_KERNEL_ID} --region ${DR_REGION}
+ec2-migrate-manifest --privatekey ${PK_PEM_PATH} --cert ${CERT_PEM_PATH} --access-key ${ACCESS_KEY} --secret-key ${SECRET_KEY} --manifest image.manifest.xml --kernel ${DR_KERNEL_ID} --region ${DR_REGION}
 
 echo "--------------------------"
 echo "Execute ec2-upload-bundle ..."
