@@ -1,6 +1,13 @@
 #!/bin/sh
 # Usage: # sh create_image_and_register_different_region.sh
 
+if [[ -f ${HOME}/.ami_config.sh ]] ; then
+  source ${HOME}/.ami_config.sh
+else
+  echo "Not exist config file."
+  exit 0
+fi
+
 # Warn: please execute ruby 1.8.7.
 confirm_execution() {
   echo  "You are using ruby `ruby -v`"
@@ -29,17 +36,6 @@ export JAVA_HOME=/usr/lib/jvm/jre
 
 DATE=`date +"%Y%m%d_%H%M"`
 AMI_DIR=/mnt/ami
-
-PK_PEM_PATH=/root/.certs/pk-.pem
-CERT_PEM_PATH=/root/.certs/cert-.pem
-ACCESS_KEY=""
-SECRET_KEY=""
-ACCOUNT_ID=""
-
-DR_REGION=""
-DR_BUCKET=""
-DR_KERNEL_ID=""
-SHARING_USER_ID=""
 
 echo "--------------------------"
 echo "Remove old AMI images ..."
