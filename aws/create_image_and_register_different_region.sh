@@ -1,7 +1,29 @@
 #!/bin/sh
-#Usage: # sh create_image_and_register_different_region.sh
-export RUBYLIB=$RUBYLIB:/usr/lib/ruby/site_ruby
+# Usage: # sh create_image_and_register_different_region.sh
 
+# Warn: please execute ruby 1.8.7.
+confirm_execution() {
+  echo  "You are using ruby `ruby -v`"
+  echo "Using ruby 1.8.7 ? [yes/no]"
+  read confirm
+  if [ "$confirm" = "no" ]; then
+    echo "Please execute following."
+    echo ""
+    echo "source /usr/local/rvm/scripts/rvm"
+    echo "rvm use 1.8.7"
+    echo ""
+    echo "after executed create image, execute following command."
+    echo "rvm use system"
+    exit 0
+  elif [ "$confirm" = "yes" ]; then
+    echo "Continue..."
+  else
+    confirm_execution
+  fi
+}
+confirm_execution
+
+export RUBYLIB=$RUBYLIB:/usr/lib/ruby/site_ruby
 export EC2_HOME=/usr/local/ec2/apitools
 export JAVA_HOME=/usr/lib/jvm/jre
 
@@ -10,18 +32,13 @@ AMI_DIR=/mnt/ami
 
 PK_PEM_PATH=/root/.certs/pk-.pem
 CERT_PEM_PATH=/root/.certs/cert-.pem
-
 ACCESS_KEY=""
 SECRET_KEY=""
 ACCOUNT_ID=""
-#REGION=""
-#BUCKET=""
-#KERNEL_ID=""
 
 DR_REGION=""
 DR_BUCKET=""
 DR_KERNEL_ID=""
-
 SHARING_USER_ID=""
 
 echo "--------------------------"
@@ -39,32 +56,28 @@ cd ${AMI_DIR}
 echo "--------------------------"
 echo "Execute ec2-bundle-vol ..."
 echo "--------------------------"
-# Ref : http://dev.koba206.com/?p=61
 /usr/local/bin/ec2-bundle-vol -d ${AMI_DIR} --privatekey ${PK_PEM_PATH} --cert ${CERT_PEM_PATH} --user ${ACCOUNT_ID}
-
-#echo "--------------------------"
-#echo "Execute ec2-upload-bundle ..."
-#echo "--------------------------"
-
-#ec2-upload-bundle --bucket ${BUCKET}/${DATE} --manifest image.manifest.xml --access-key ${ACCESS_KEY} --secret-key ${SECRET_KEY}
 
 echo "--------------------------"
 echo "Execute ec2-migrate-manifest ..."
 echo "--------------------------"
+ec2-migrate-manifest --privatekey ${PK_PEM_PATH} -cert ${CERT_PEM_PATH} --access-key ${ACCESS_KEY} --secret-key ${SECRET_KEY} --manifest image.manifest.xml --kernel ${DR_KERNEL_ID} --region ${DR_REGION}
 
-ec2-migrate-bundle --privatekey ${PK_PEM_PATH} -cert ${CERT_PEM_PATH} --access-key ${ACCESS_KEY} --secret-key ${SECRET_KEY} --manifest image.manifest.xml --kernel ${DR_KERNEL_ID} --region ${DR_REGION}
+echo "--------------------------"
+echo "Execute ec2-upload-bundle ..."
+echo "--------------------------"
+ec2-upload-bundle --bucket ${DR_BUCKET}/${DATE} --manifest image.manifest.xml --access-key ${ACCESS_KEY} --secret-key ${SECRET_KEY} --retry
 
 echo "--------------------------"
 echo "Regist AMI ..."
 echo "--------------------------"
-
 REGIST_RESULT=`/usr/local/ec2/apitools/bin/ec2-register --region ${DR_REGION} ${DR_BUCKET}/${DATE}/image.manifest.xml -K ${PK_PEM_PATH} -C ${CERT_PEM_PATH}`
 echo ${REGIST_RESULT}
 
 AMI_ID=`echo ${REGIST_RESULT} | grep "IMAGE" | awk '{print $2}'`
 echo "AMI : ${AMI_ID}"
 
-sleep 10
+sleep 5
 
 if echo ${AMI_ID} | grep "ami-"
 then
