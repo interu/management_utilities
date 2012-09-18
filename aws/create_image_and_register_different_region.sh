@@ -1,6 +1,6 @@
 #!/bin/sh
 #Usage: # sh create_image_and_register_different_region.sh
-#export RUBYLIB=$RUBYLIB:/usr/lib/ruby/site_ruby
+export RUBYLIB=$RUBYLIB:/usr/lib/ruby/site_ruby
 
 export EC2_HOME=/usr/local/ec2/apitools
 export JAVA_HOME=/usr/lib/jvm/jre
@@ -13,9 +13,11 @@ CERT_PEM_PATH=/root/.certs/cert-.pem
 
 ACCESS_KEY=""
 SECRET_KEY=""
-ACCONT_ID="xxxx-xxxx-xxxx"
-BUCKET=""
-REGION="ap-northeast-1"
+ACCOUNT_ID=""
+TARGET_REGION=""
+TARGET_REGION_BUCKET=""
+TARGET_REGION_KERNEL_ID=""
+SHARING_USER_ID=""
 
 echo "--------------------------"
 echo "Remove old AMI images ..."
@@ -27,25 +29,25 @@ if [ -d "${AMI_DIR}" ]; then
 fi
 
 mkdir -p ${AMI_DIR}
-cd /mnt/ami
+cd ${AMI_DIR}
 
 echo "--------------------------"
 echo "Execute ec2-bundle-vol ..."
 echo "--------------------------"
-
-/usr/local/bin/ec2-bundle-vol -d ${AMI_DIR} --privatekey ${PK_PEM_PATH} --cert ${CERT_PEM_PATH} --user ${ACCOUNT_ID} --fstab /etc/fstab --exclude /ebs
+# Ref : http://dev.koba206.com/?p=61
+/usr/local/bin/ec2-bundle-vol -d ${AMI_DIR} --privatekey ${PK_PEM_PATH} --cert ${CERT_PEM_PATH} --user ${ACCOUNT_ID} --kernel ${TARGET_REGION_KERNEL_ID}
 
 echo "--------------------------"
 echo "Execute ec2-upload-bundle ..."
 echo "--------------------------"
-############### manifext.xml内のkernelIDとかを置換する
-ec2-upload-bundle --bucket ${BUCKET}/${DATE} --manifest image.manifest.xml --access-key ${ACCESS_KEY} --secret-key ${SECRET_KEY}
+
+ec2-upload-bundle --bucket ${TARGET_REGION_BUCKET}/${DATE} --manifest image.manifest.xml --access-key ${ACCESS_KEY} --secret-key ${SECRET_KEY}
 
 echo "--------------------------"
 echo "Regist AMI ..."
 echo "--------------------------"
 
-REGIST_RESULT=`/usr/local/ec2/apitools/bin/ec2-register --region ${REGION} ${BUCKET}/${DATE}/image.manifest.xml -K ${PK_PEM_PATH} -C ${CERT_PEM_PATH}`
+REGIST_RESULT=`/usr/local/ec2/apitools/bin/ec2-register --region ${TARGET_REGION} ${TARGET_REGION_BUCKET}/${DATE}/image.manifest.xml -K ${PK_PEM_PATH} -C ${CERT_PEM_PATH}`
 echo ${REGIST_RESULT}
 
 AMI_ID=`echo ${REGIST_RESULT} | grep "IMAGE" | awk '{print $2}'`
@@ -58,9 +60,7 @@ then
   echo "--------------------------"
   echo "Change AMI permission ..."
   echo "--------------------------"
-
-  USER_ID="xxxxxxxxxxxx"
-  /usr/local/ec2/apitools/bin/ec2-modify-image-attribute ${AMI_ID} -l -a ${USER_ID} -K ${PK_PEM_PATH} -C ${CERT_PEM_PATH} --region ${REGION}
+  /usr/local/ec2/apitools/bin/ec2-modify-image-attribute ${AMI_ID} -l -a ${SHARING_USER_ID} -K ${PK_PEM_PATH} -C ${CERT_PEM_PATH} --region ${TARGET_REGION}
 else
   echo "[ERROR] AMI_ID is invalid."
 fi
