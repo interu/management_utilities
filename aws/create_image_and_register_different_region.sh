@@ -19,8 +19,6 @@ confirm_execution() {
     echo "source /usr/local/rvm/scripts/rvm"
     echo "rvm use 1.8.7"
     echo ""
-    echo "after executed create image, execute following command."
-    echo "rvm use system"
     exit 0
   elif [ "$confirm" = "yes" ]; then
     echo "Continue..."
@@ -84,3 +82,7 @@ then
 else
   echo "[ERROR] AMI_ID is invalid."
 fi
+
+echo "if you are using rvm, please execute following command."
+echo ""
+echo "rvm use system"
