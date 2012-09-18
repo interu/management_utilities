@@ -1,5 +1,5 @@
 #!/bin/sh
-# Usage: # sh create_image_and_register_different_region.sh
+# Usage: # sh create_instancestore_ami_for_dr.sh
 
 if [[ -f ${HOME}/.ami_config.sh ]] ; then
   source ${HOME}/.ami_config.sh
