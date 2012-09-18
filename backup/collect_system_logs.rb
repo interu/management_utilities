@@ -3,11 +3,18 @@
 # Set backup schedule 06:00am
 #     logrotate.d/syslog daily
 
-require 'pit'
+require 'constellation'
 
-timestamp = Date.today.strftime('%Y%m%d')
+class MyConfiguration
+  Constellation.enhance self
+  self.config_file = "~/.config.yml"
+end
+
 pit_s3 = Pit.get('s3', :require => { 'access_key' => '', 'secret_key' => '', 'region' => '', 'bucket' => ''})
 pit_gmail = Pit.get('gmail', :require => { 'to' => '', 'from' => '', 'password' => ''})
+
+timestamp = Date.today.strftime('%Y%m%d')
+config = MyConfiguration.new
 
 Backup::Model.new(:system, 'system log buckup') do
   archive :logs do |archive|
@@ -30,10 +37,10 @@ Backup::Model.new(:system, 'system log buckup') do
   end
 
   store_with S3 do |s3|
-    s3.access_key_id      = pit_s3['access_key']
-    s3.secret_access_key  = pit_s3['secret_key']
-    s3.region             = pit_s3['region']
-    s3.bucket             = pit_s3['bucket']
+    s3.access_key_id      = config.aws['access_key']
+    s3.secret_access_key  = config.aws['secret_key']
+    s3.region             = config.aws['region']
+    s3.bucket             = config.s3['bucket']
     s3.path               = '/backups'
     s3.keep               = 365
   end
@@ -42,13 +49,13 @@ Backup::Model.new(:system, 'system log buckup') do
     mail.on_success           = false
     mail.on_failure           = true
 
-    mail.from                 = pit_gmail['from']
-    mail.to                   = pit_gmail['to']
+    mail.from                 = config.gmail['from']
+    mail.to                   = config.gmail['to']
     mail.address              = 'smtp.gmail.com'
     mail.port                 = 587
     mail.domain               = 'smtp.gmail.com'
-    mail.user_name            = pit_gmail['from']
-    mail.password             = pit_gmail['password']
+    mail.user_name            = config.gmail['from']
+    mail.password             = config.gmail['password']
     mail.authentication       = 'plain'
     mail.enable_starttls_auto = true
   end

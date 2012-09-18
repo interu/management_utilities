@@ -3,11 +3,14 @@
 require 'rubygems'
 require 'right_aws'
 require 'active_support/time' ## activesupport v3
-require 'pit'
+require 'constellation'
+
+class MyConfiguration
+  Constellation.enhance self
+  self.config_file = "~/.config.yml"
+end
 
 class ManageSnapshot
-  @@pit = Pit.get('s3', :require => { 'access_key' => '', 'secret_key' => '', 'volume_id' => '', 'owner_id' => '', 'region' => '', 'app_title' => ''})
-
   attr_accessor :access_key, :secret_key, :volume_id, :owner_id, :region, :description, :long_period, :short_period
 
   def self.run
@@ -15,13 +18,14 @@ class ManageSnapshot
   end
 
   def initialize(opt = {})
-    @access_key  = opt[:access_key] || @@pit['access_key']
-    @secret_key  = opt[:secret_key] || @@pit['secret_key']
-    @volume_id   = opt[:volume_id] || @@pit['volume_id']
-    @owner_id    = opt[:owner_id] || @@pit['owner_id']
-    @region      = opt[:region] || @@pit['region']
-    @description = opt[:description] || @@pit['app_title']
-    @long_period = opt[:long_period] || 12.hour
+    config = MyConfiguration.new
+    @access_key  = opt[:access_key]    || config.aws['access_key']
+    @secret_key  = opt[:secret_key]    || config.aws['secret_key']
+    @owner_id    = opt[:owner_id]      || config.aws['owner_id']
+    @region      = opt[:region]        || config.aws['region']
+    @volume_id   = opt[:volume_id]     || config.ebs['volume_id']
+    @description = opt[:description]   || config.ebs['description']
+    @long_period = opt[:long_period]   || 12.hour
     @short_period = opt[:short_period] || 2.hour
   end
 
@@ -63,22 +67,20 @@ class ManageSnapshot
 end
 
 if __FILE__ == $0
+  config = MyConfiguration.new
   begin
     ManageSnapshot.run
   rescue Exception => e
     require "mail"
     require 'i18n'
 
-    pit_gmail = Pit.get('gmail', :require => { 'to' => '', 'from' => '', 'password' => ''})
-    pit_s3 = Pit.get('s3', :require => { 'app_title' => ''})
-
     Mail.defaults do
       delivery_method :smtp, {
         :address              => "smtp.gmail.com",
         :port                 => 587,
         :domain               => 'smtp.gmail.com',
-        :user_name            => pit_gmail['from'],
-        :password             => pit_gmail['password'],
+        :user_name            => config.gmail['from'],
+        :password             => config.gmail['password'],
         :authentication       => 'plain',
         :enable_starttls_auto => true
       }
@@ -87,9 +89,9 @@ if __FILE__ == $0
     end
 
     Mail.deliver do |mail|
-      to pit_gmail['to']
-      from pit_gmail['from']
-      subject "[#{pit_s3['app_title']}] Manage Snapshot Error"
+      to config.gmail['to']
+      from config.gmail['from']
+      subject "[#{config.app_name}] Create AMI Error"
       body <<-EOF
 Manage Snapshot Error
 
