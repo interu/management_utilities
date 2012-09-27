@@ -10,9 +10,6 @@ class MyConfiguration
   self.config_file = "~/.config.yml"
 end
 
-pit_s3 = Pit.get('s3', :require => { 'access_key' => '', 'secret_key' => '', 'region' => '', 'bucket' => ''})
-pit_gmail = Pit.get('gmail', :require => { 'to' => '', 'from' => '', 'password' => ''})
-
 timestamp = Date.today.strftime('%Y%m%d')
 config = MyConfiguration.new
 
