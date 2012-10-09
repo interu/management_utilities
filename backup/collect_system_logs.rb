@@ -44,6 +44,7 @@ Backup::Model.new(:system, 'system log buckup') do
 
   notify_by Mail do |mail|
     mail.on_success           = false
+    mail.on_warning           = false
     mail.on_failure           = true
 
     mail.from                 = config.gmail['from']
