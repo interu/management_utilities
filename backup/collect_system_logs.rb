@@ -1,4 +1,4 @@
-# gem install backup
+# gem install backup -v3.0.25
 # execute : # backup perform -t system --config_file '/root/scripts/backup/collect_system_logs.rb'
 # Set backup schedule 06:00am
 #     logrotate.d/syslog daily
@@ -22,15 +22,15 @@ Backup::Model.new(:system, 'system log buckup') do
     archive.add '/var/log/maillog'
     archive.add "/var/log/maillog-#{timestamp}.gz"
     archive.add '/var/log/boot.log'
-    archive.add "/var/log/boot-#{timestamp}.gz"
+    archive.add "/var/log/cron-#{timestamp}.gz"
+    archive.add '/var/log/cron'
     #monthly or weekly
-    archive.add '/var/log/dmesg'
     archive.add '/var/log/wtmp'
     archive.add '/var/log/lastlog'
   end
 
   compress_with Gzip do |compression|
-    compression.best = true
+    compression.level = 6
   end
 
   store_with S3 do |s3|
@@ -39,7 +39,7 @@ Backup::Model.new(:system, 'system log buckup') do
     s3.region             = config.aws['region']
     s3.bucket             = config.s3['bucket']
     s3.path               = '/backups'
-    s3.keep               = 365
+    s3.keep               = 365 * 5
   end
 
   notify_by Mail do |mail|
