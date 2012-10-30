@@ -21,7 +21,7 @@ class ManageSnapshot
     config = MyConfiguration.new
     @access_key  = opt[:access_key]    || config.aws['access_key']
     @secret_key  = opt[:secret_key]    || config.aws['secret_key']
-    @owner_id    = opt[:owner_id]      || config.aws['owner_id']
+    @owner_id    = opt[:owner_id].try(:to_s) || config.aws['owner_id'].to_s
     @region      = opt[:region]        || config.aws['region']
     @volume_id   = opt[:volume_id]     || config.ebs['volume_id']
     @description = opt[:description]   || config.ebs['description']
