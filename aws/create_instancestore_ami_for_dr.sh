@@ -60,7 +60,8 @@ ec2-migrate-manifest --privatekey ${PK_PEM_PATH} --cert ${CERT_PEM_PATH} --acces
 echo "--------------------------"
 echo "Execute ec2-upload-bundle ..."
 echo "--------------------------"
-ec2-upload-bundle --bucket ${DR_BUCKET}/${DATE} --manifest image.manifest.xml --access-key ${ACCESS_KEY} --secret-key ${SECRET_KEY} --retry
+ec2-upload-bundle --bucket ${DR_BUCKET}/${DATE} --manifest image.manifest.xml --access-key ${ACCESS_KEY} --secret-key ${SECRET_KEY} --location ${DR_REGION}
+echo "y"
 
 echo "--------------------------"
 echo "Regist AMI ..."
@@ -78,7 +79,7 @@ then
   echo "--------------------------"
   echo "Change AMI permission ..."
   echo "--------------------------"
-  /usr/local/ec2/apitools/bin/ec2-modify-image-attribute ${AMI_ID} -l -a ${SHARING_USER_ID} -K ${PK_PEM_PATH} -C ${CERT_PEM_PATH} --region ${DR_REGION}
+  #/usr/local/ec2/apitools/bin/ec2-modify-image-attribute ${AMI_ID} -l -a ${SHARING_USER_ID} -K ${PK_PEM_PATH} -C ${CERT_PEM_PATH} --region ${DR_REGION}
 else
   echo "[ERROR] AMI_ID is invalid."
 fi
