@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+#-*- encoding : utf-8 -*-
 
 require 'rubygems'
 require 'right_aws'
@@ -91,7 +92,7 @@ if __FILE__ == $0
     Mail.deliver do |mail|
       to config.gmail['to']
       from config.gmail['from']
-      subject "[#{config.app_name}] Create AMI Error"
+      subject "[#{config.app_name}] Create Snapshot Error"
       body <<-EOF
 Manage Snapshot Error
 
