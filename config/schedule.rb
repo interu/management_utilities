@@ -8,8 +8,8 @@
 set :job_template, nil
 set :path, "/root/management_utilities"
 set :output, "/tmp/batch.log"
-job_type :rake, "cd :path && RAILS_ENV=:environment bundle exec rake :task :output"
-job_type :command, "cd :path && RAILS_ENV=:environment bundle exec :task :output"
+job_type :rake, "cd :path && bundle exec rake :task :output"
+job_type :command, "cd :path && bundle exec :task :output"
 job_type :runner,  "cd :path && script/runner -e :environment ':task' :output"
 
 ## システムログをS3に退避
