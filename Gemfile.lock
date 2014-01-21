@@ -71,6 +71,7 @@ DEPENDENCIES
   constellation (= 0.1.1)
   excon (= 0.17.0)
   fog (= 1.9.0)
+  i18n
   mail
   net-ssh (= 2.5.2)
   nokogiri (= 1.5.9)
