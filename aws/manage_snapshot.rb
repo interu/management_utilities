@@ -2,7 +2,7 @@
 #-*- encoding : utf-8 -*-
 
 require 'rubygems'
-require 'right_aws'
+require 'aws'
 require 'active_support/time' ## activesupport v3
 require 'constellation'
 
@@ -31,7 +31,7 @@ class ManageSnapshot
   end
 
   def ec2
-    @ec2 ||= RightAws::Ec2.new(access_key, secret_key, {:region => region})
+    @ec2 ||= Aws::Ec2.new(access_key, secret_key, {:region => region})
   end
 
   def run
