@@ -18,7 +18,9 @@ every 1.day, at: '6:00 am' do
 end
 
 ## EBSボリュームのsnapshot定期取得
-every :hour do
+#### サーバのシステム時間とAWS IPのシステム時間のズレがあると
+#### 最新のスナップショットだけしか残らなくなるので0分は指定しないこと
+every '5 * * * *' do
   command "ruby aws/manage_snapshot.rb"
 end
 
