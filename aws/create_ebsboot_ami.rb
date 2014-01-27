@@ -27,7 +27,7 @@ class CreateAmi
   end
 
   def ec2
-    @ec2 ||= Aws::Ec2.new(access_key, secret_key, {:region => region})
+    @ec2 ||= AWS::EC2.new(access_key_id: access_key, secret_access_key: secret_key, region: region)
   end
 
   def run
@@ -37,7 +37,7 @@ class CreateAmi
   def create_ami
     if valid_instance?
       puts "[OK] Start registing #{registing_name} ..."
-      ec2.create_image(instance_id, {:name => registing_name, :no_reboot => true})
+      ec2.instances[instance_id].create_image(registing_name, { description: registing_name, no_reboot: true })
     else
       puts "[Error] Instance ID was different."
     end
@@ -58,8 +58,8 @@ if __FILE__ == $0
   begin
     CreateAmi.run
   rescue Exception => e
+    puts "[ERROR] Detail:\n #{e.inspect}"
     require "mail"
-    require 'i18n'
 
     Mail.defaults do
       delivery_method :smtp, {
