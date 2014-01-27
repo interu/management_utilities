@@ -41,15 +41,18 @@ class ManageSnapshot
   end
 
   def create_snapshot
+    puts '[INFO] Create snapshot.'
     ec2.volumes[volume_id].create_snapshot(description)
   end
 
   def check_status_snapshot(snapshots = select_owners_and_same_description_snapshots)
+    puts '[INFO] Check status snapshot.'
     result = snapshots.select{ |ss| ss.status == "pending" }
     raise "pending status count : #{result.count}" if result.count >= 2
   end
 
   def delete_snapshot(snapshots = select_snapshot_to_delete)
+    puts '[INFO] Delete snapshots ...'
     snapshots.each do |snapshot|
       snapshot.delete
     end
