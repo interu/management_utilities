@@ -81,7 +81,7 @@ if __FILE__ == $0
   rescue Exception => e
     puts "[ERROR] Detail:\n #{e.inspect}"
     require "mail"
-    require 'i18n'
+    #require 'i18n'
 
     Mail.defaults do
       delivery_method :smtp, {
