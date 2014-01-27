@@ -59,13 +59,17 @@ class ManageSnapshot
   end
 
   def select_snapshot_to_delete(snapshots = select_owners_and_same_description_snapshots)
+    puts '[INFO] Select snapshots to delete.'
     target = []
+    puts '[INFO] First narrowing-down.'
     target << snapshots.select { |ss| Time.parse(ss.start_time) <= long_period.ago }
+    puts '[INFO] Second narrowing-down.'
     target << snapshots.select { |ss| short_period.ago > Time.parse(ss.start_time) && Time.parse(ss.start_time) >= long_period.ago && 10 < Time.parse(ss.start_time).min }
     target.flatten
   end
 
   def select_owners_and_same_description_snapshots
+    puts '[INFO] Select owners and same description snapshots.'
     ec2.snapshots.with_owner(owner_id).select{ |snapshot| snapshot.description == description }
   end
 end
@@ -75,6 +79,7 @@ if __FILE__ == $0
   begin
     ManageSnapshot.run
   rescue Exception => e
+    puts "[ERROR] Detail:\n #{e.inspect}"
     require "mail"
     require 'i18n'
 
