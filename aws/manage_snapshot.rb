@@ -2,7 +2,7 @@
 #-*- encoding : utf-8 -*-
 
 require 'rubygems'
-require 'aws'
+require 'aws-sdk'
 require 'active_support/time' ## activesupport v3
 require 'constellation'
 
@@ -31,7 +31,7 @@ class ManageSnapshot
   end
 
   def ec2
-    @ec2 ||= Aws::Ec2.new(access_key, secret_key, {:region => region})
+    @ec2 ||= AWS::EC2.new(access_key_id: access_key, secret_access_key: secret_key, region: region)
   end
 
   def run
@@ -41,29 +41,29 @@ class ManageSnapshot
   end
 
   def create_snapshot
-    ec2.create_snapshot(volume_id, description)
+    ec2.volumes[volume_id].create_snapshot(description)
   end
 
   def check_status_snapshot(snapshots = select_owners_and_same_description_snapshots)
-    result = snapshots.select{ |ss| ss[:aws_status] == "pending" }
+    result = snapshots.select{ |ss| ss.status == "pending" }
     raise "pending status count : #{result.count}" if result.count >= 2
   end
 
   def delete_snapshot(snapshots = select_snapshot_to_delete)
     snapshots.each do |snapshot|
-      ec2.delete_snapshot(snapshot[:aws_id])
+      snapshot.delete
     end
   end
 
   def select_snapshot_to_delete(snapshots = select_owners_and_same_description_snapshots)
     target = []
-    target << snapshots.select { |ss| Time.parse(ss[:aws_started_at]) <= long_period.ago }
-    target << snapshots.select { |ss| short_period.ago > Time.parse(ss[:aws_started_at]) and Time.parse(ss[:aws_started_at]) >= long_period.ago and 10 < Time.parse(ss[:aws_started_at]).min }
+    target << snapshots.select { |ss| Time.parse(ss.start_time) <= long_period.ago }
+    target << snapshots.select { |ss| short_period.ago > Time.parse(ss.start_time) && Time.parse(ss.start_time) >= long_period.ago && 10 < Time.parse(ss.start_time).min }
     target.flatten
   end
 
   def select_owners_and_same_description_snapshots
-    ec2.describe_snapshots.select{ |snapshot| snapshot[:aws_owner] == owner_id and snapshot[:aws_description] == description }
+    ec2.snapshots.with_owner(owner_id).select{ |snapshot| snapshot.description == description }
   end
 end
 
