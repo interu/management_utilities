@@ -62,9 +62,9 @@ class ManageSnapshot
     puts '[INFO] Select snapshots to delete.'
     target = []
     puts '[INFO] First narrowing-down.'
-    target << snapshots.select { |ss| Time.parse(ss.start_time) <= long_period.ago }
+    target << snapshots.select { |ss| ss.start_time <= long_period.ago }
     puts '[INFO] Second narrowing-down.'
-    target << snapshots.select { |ss| short_period.ago > Time.parse(ss.start_time) && Time.parse(ss.start_time) >= long_period.ago && 10 < Time.parse(ss.start_time).min }
+    target << snapshots.select { |ss| short_period.ago > ss.start_time && ss.start_time >= long_period.ago && 10 < ss.start_time.min }
     target.flatten
   end
 
