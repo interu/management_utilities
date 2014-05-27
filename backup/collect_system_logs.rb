@@ -18,15 +18,14 @@ config = MyConfiguration.new
 
 Backup::Model.new(:system, 'system log buckup') do
   archive :logs do |archive|
-    archive.add '/var/log/messages'
-    archive.add "/var/log/messages-#{timestamp}.gz"
-    archive.add '/var/log/secure'
-    archive.add "/var/log/secure-#{timestamp}.gz"
-    archive.add '/var/log/maillog'
-    archive.add "/var/log/maillog-#{timestamp}.gz"
-    archive.add '/var/log/boot.log'
-    archive.add "/var/log/cron-#{timestamp}.gz"
-    archive.add '/var/log/cron'
+    archive.add '/var/log/syslog'
+    archive.add "/var/log/syslog-#{timestamp}"
+    archive.add '/var/log/auth.log'
+    archive.add "/var/log/auth.log-#{timestamp}"
+    archive.add '/var/log/mail.log'
+    archive.add "/var/log/mail.log-#{timestamp}"
+    archive.add '/var/log/ufw.log'
+    archive.add "/var/log/ufw.log-#{timestamp}"
     #monthly or weekly
     archive.add '/var/log/wtmp'
     archive.add '/var/log/lastlog'
