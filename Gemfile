@@ -1,3 +1,4 @@
+ruby '2.0.0'
 source 'https://rubygems.org'
 # Avoid invalid byte sequence error for OpsWorks
 Encoding.default_external = Encoding::UTF_8
