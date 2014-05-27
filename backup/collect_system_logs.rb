@@ -1,7 +1,10 @@
-# gem install backup -v3.0.25
-# execute : # backup perform -t system --config_file '/root/scripts/backup/collect_system_logs.rb'
-# Set backup schedule 06:00am
-#     logrotate.d/syslog daily
+# encoding: utf-8
+
+##
+# Backup v4.x Configuration
+#
+# Documentation: http://meskyanichi.github.io/backup
+# Issue Tracker: https://github.com/meskyanichi/backup/issues
 
 require 'constellation'
 
@@ -55,6 +58,6 @@ Backup::Model.new(:system, 'system log buckup') do
     mail.user_name            = config.gmail['from']
     mail.password             = config.gmail['password']
     mail.authentication       = 'plain'
-    mail.enable_starttls_auto = true
+    mail.encryption           = :starttls
   end
 end
