@@ -13,7 +13,7 @@ job_type :command, "cd :path && bundle exec :task :output"
 job_type :runner,  "cd :path && script/runner -e :environment ':task' :output"
 
 ## システムログをS3に退避
-every 1.day, at: '6:00 am' do
+every 1.day, at: '7:00 am' do
   command "backup perform -t system --config_file '/root/management_utilities/backup/collect_system_logs.rb'"
 end
 
