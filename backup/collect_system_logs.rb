@@ -17,6 +17,9 @@ timestamp = Date.today.strftime('%Y%m%d')
 config = MyConfiguration.new
 
 Backup::Model.new(:system, 'system log buckup') do
+
+  split_into_chunks_of 4000
+
   archive :logs do |archive|
     archive.add '/var/log/syslog'
     archive.add "/var/log/syslog-#{timestamp}"
