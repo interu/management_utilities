@@ -17,6 +17,12 @@ every 1.day, at: '6:00 am' do
   command "backup perform -t system --config_file '/root/management_utilities/backup/collect_system_logs.rb'"
 end
 
+## データをS3に退避
+#every 1.day, at: '2:00 am' do
+#  command "backup perform -t db --config_file '/root/management_utilities/backup/collect_db.rb'"
+#end
+
+
 ## EBSボリュームのsnapshot定期取得
 #### サーバのシステム時間とAWS IPのシステム時間のズレがあると
 #### 最新のスナップショットだけしか残らなくなるので0分は指定しないこと

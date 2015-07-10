@@ -17,3 +17,8 @@ gmail:
   from:
   to:
   password:
+mysql:
+  database:
+  username:
+  password:
+  host:
