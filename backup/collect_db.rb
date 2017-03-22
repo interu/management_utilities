@@ -1,4 +1,6 @@
-# gem install backup -v3.0.25
+##
+# Backup v4.x Configuration
+#
 # execute : # backup perform -t db --config_file '/root/scripts/backup/collect_db.rb'
 # Set backup schedule 02:00am
 #     logrotate.d/syslog daily
@@ -13,6 +15,27 @@ end
 timestamp = Date.today.strftime('%Y%m%d')
 config = MyConfiguration.new
 
+Storage::S3.defaults do |s3|
+  s3.access_key_id      = config.aws['access_key']
+  s3.secret_access_key  = config.aws['secret_key']
+end
+
+Notifier::Mail.defaults do |mail|
+  mail.from                 = config.gmail['from']
+  mail.to                   = config.gmail['to']
+  mail.address              = 'smtp.gmail.com'
+  mail.port                 = 587
+  mail.domain               = 'smtp.gmail.com'
+  mail.user_name            = config.gmail['from']
+  mail.password             = config.gmail['password']
+  mail.authentication       = 'plain'
+  mail.enable_starttls_auto = true
+end
+
+Compressor::Gzip.defaults do |compression|
+  compression.level = 6
+end
+
 Backup::Model.new(:db, 'database buckup') do
 
   database MySQL do |database|
@@ -23,13 +46,9 @@ Backup::Model.new(:db, 'database buckup') do
     database.additional_options = ['--single-transaction', '--quick']
   end
 
-  compress_with Gzip do |compression|
-    compression.level = 6
-  end
+  compress_with Gzip
 
   store_with S3 do |s3|
-    s3.access_key_id      = config.aws['access_key']
-    s3.secret_access_key  = config.aws['secret_key']
     s3.region             = config.aws['region']
     s3.bucket             = config.s3['bucket']
     s3.path               = '/backups'
@@ -40,15 +59,5 @@ Backup::Model.new(:db, 'database buckup') do
     mail.on_success           = false
     mail.on_warning           = false
     mail.on_failure           = true
-
-    mail.from                 = config.gmail['from']
-    mail.to                   = config.gmail['to']
-    mail.address              = 'smtp.gmail.com'
-    mail.port                 = 587
-    mail.domain               = 'smtp.gmail.com'
-    mail.user_name            = config.gmail['from']
-    mail.password             = config.gmail['password']
-    mail.authentication       = 'plain'
-    mail.enable_starttls_auto = true
   end
 end
