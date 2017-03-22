@@ -29,7 +29,7 @@ Notifier::Mail.defaults do |mail|
   mail.user_name            = config.gmail['from']
   mail.password             = config.gmail['password']
   mail.authentication       = 'plain'
-  mail.enable_starttls_auto = true
+  mail.encryption           = :starttls
 end
 
 Compressor::Gzip.defaults do |compression|
