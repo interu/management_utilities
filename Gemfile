@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 # Avoid invalid byte sequence error for OpsWorks
 Encoding.default_external = Encoding::UTF_8
 
-gem 'aws-sdk'
+gem 'aws-sdk', '~> 3'
 gem 'activesupport'
 gem 'constellation', '0.1.1'
 gem 'mail'
