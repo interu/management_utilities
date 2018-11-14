@@ -1,4 +1,6 @@
 # Installation
+apt install ruby ruby-dev
+
 bundle install --path ./
 
 # Registration

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'rubygems'
-require 'aws'
+require 'aws-sdk'
 require 'active_support/time'
 require 'constellation'
 
@@ -27,7 +27,7 @@ class CreateAmi
   end
 
   def ec2
-    @ec2 ||= AWS::EC2::Client.new(access_key_id: access_key, secret_access_key: secret_key, region: region)
+    @ec2 ||= Aws::EC2::Client.new(access_key_id: access_key, secret_access_key: secret_key, region: region)
   end
 
   def run
