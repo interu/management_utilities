@@ -1,5 +1,5 @@
 ##
-# Backup v4.x Configuration
+# Backup v5.x Configuration
 #
 ## execute : # backup perform -t system --config_file '/root/scripts/backup/collect_system_logs.rb'
 # Set backup schedule 06:00am

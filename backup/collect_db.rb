@@ -1,5 +1,5 @@
 ##
-# Backup v4.x Configuration
+# Backup v5.x Configuration
 #
 # execute : # backup perform -t db --config_file '/root/scripts/backup/collect_db.rb'
 # Set backup schedule 02:00am
