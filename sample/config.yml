@@ -9,7 +9,6 @@ ebs:
   volume_id:
   description:
 ami:
-  instance_id:
   regist_key:
 s3:
   bucket:
