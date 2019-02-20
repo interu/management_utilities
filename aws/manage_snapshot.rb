@@ -42,12 +42,12 @@ class ManageSnapshot
 
   def create_snapshot
     puts '[INFO] Create snapshot.'
-    ec2.volumes[volume_id].create_snapshot(description)
+    ec2.create_snapshot({volume_id: volume_id, description: description})
   end
 
   def check_status_snapshot(snapshots = select_owners_and_same_description_snapshots)
     puts '[INFO] Check status snapshot.'
-    result = snapshots.select{ |ss| ss.status == "pending" }
+    result = snapshots.select{ |ss| ss.state == 'pending' }
     raise "pending status count : #{result.count}" if result.count >= 2
   end
 
@@ -70,7 +70,13 @@ class ManageSnapshot
 
   def select_owners_and_same_description_snapshots
     puts '[INFO] Select owners and same description snapshots.'
-    ec2.snapshots.with_owner(owner_id).select{ |snapshot| snapshot.description == description }
+    ec2.describe_snapshots({
+      filters: [{
+        name: 'description',
+        values: [description]
+      }],
+      owner_ids: [owner_id]
+    }).snapshots
   end
 end
 
