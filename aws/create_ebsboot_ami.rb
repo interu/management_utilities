@@ -35,21 +35,16 @@ class CreateAmi
   end
 
   def create_ami
-    if valid_instance?
-      puts "[OK] Start registing #{registing_name} ..."
-      ec2.instances[instance_id].create_image(registing_name, { description: registing_name, no_reboot: true })
-    else
-      puts "[Error] Instance ID was different."
-    end
+    puts "[OK] Start registing #{registing_name} ..."
+    ec2.create_image(instance_id: get_instance_id, name: registing_name, description: registing_name, no_reboot: true)
   end
 
   def registing_name
     "#{Time.now.strftime("%Y%m%d_%H%M")}_#{regist_key}"
   end
 
-  def valid_instance?
-    metadata = `curl -s http://169.254.169.254/latest/meta-data/instance-id`
-    metadata == instance_id
+  def get_instance_id
+    `curl -s http://169.254.169.254/latest/meta-data/instance-id`
   end
 end
 
