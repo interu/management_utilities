@@ -12,10 +12,14 @@ ami:
   regist_key:
 s3:
   bucket:
-gmail:
+mail:
   from:
   to:
+  address:
+  user_name:
   password:
+  port: 587
+
 mysql:
   database:
   username:

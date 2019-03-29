@@ -16,17 +16,16 @@ timestamp = Date.today.strftime('%Y%m%d')
 config = MyConfiguration.new
 
 Storage::S3.defaults do |s3|
-  s3.access_key_id      = config.aws['access_key']
-  s3.secret_access_key  = config.aws['secret_key']
+  s3.use_iam_profile = true
 end
 
 Notifier::Mail.defaults do |mail|
-  mail.from                 = config.gmail['from']
-  mail.to                   = config.gmail['to']
-  mail.address              = 'smtp.gmail.com'
-  mail.port                 = 587
-  mail.domain               = 'smtp.gmail.com'
-  mail.user_name            = config.gmail['from']
+  mail.from                 = config.mail['user_name']
+  mail.to                   = config.mail['to']
+  mail.address              = config.mail['address']
+  mail.port                 = config.mail['port']
+  mail.domain               = config.mail['address']
+  mail.user_name            = config.gmail['user_nam3']
   mail.password             = config.gmail['password']
   mail.authentication       = 'plain'
   mail.encryption           = :starttls
@@ -38,15 +37,19 @@ end
 
 Backup::Model.new(:system, 'system log buckup') do
   archive :logs do |archive|
-    archive.add '/var/log/messages'
-    archive.add "/var/log/messages-#{timestamp}.gz"
-    archive.add '/var/log/secure'
-    archive.add "/var/log/secure-#{timestamp}.gz"
-    archive.add '/var/log/maillog'
-    archive.add "/var/log/maillog-#{timestamp}.gz"
-    archive.add '/var/log/boot.log'
-    archive.add "/var/log/cron-#{timestamp}.gz"
-    archive.add '/var/log/cron'
+    archive.add '/var/log/auth.log'
+    archive.add "/var/log/auth.log.1"
+    archive.add '/var/log/kern.log'
+    archive.add "/var/log/kern.log.1"
+    archive.add '/var/log/syslog.log'
+    archive.add "/var/log/syslog.log.1"
+    # archive.add '/var/log/apache2/access.log'
+    # archive.add '/var/log/apache2/access.log.1'
+    # archive.add '/var/log/apache2/error.log'
+    # archive.add '/var/log/apache2/error.log.1'
+    # archive.add '/var/log/apache2/other_vhosts_access.log'
+    # archive.add '/var/log/apache2/other_vhosts_access.log.1'
+
     #monthly or weekly
     archive.add '/var/log/wtmp'
     archive.add '/var/log/lastlog'
@@ -58,7 +61,7 @@ Backup::Model.new(:system, 'system log buckup') do
     s3.region             = config.aws['region']
     s3.bucket             = config.s3['bucket']
     s3.path               = '/backups'
-    s3.keep               = 365 * 5
+    # s3.keep               = 365 * 5
   end
 
   notify_by Mail do |mail|

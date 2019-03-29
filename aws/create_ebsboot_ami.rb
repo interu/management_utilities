@@ -58,21 +58,21 @@ if __FILE__ == $0
 
     Mail.defaults do
       delivery_method :smtp, {
-        :address              => "smtp.gmail.com",
-        :port                 => 587,
-        :domain               => 'smtp.gmail.com',
-        :user_name            => config.gmail['from'],
-        :password             => config.gmail['password'],
-        :authentication       => 'plain',
-        :enable_starttls_auto => true
+        :address => config.mail['address'],
+        :port => config.mail['port'],
+        :domain => config.mail['address'],
+        :user_name => config.mail['user_name'],
+        :password => config.mail['password'],
+        :authentication => 'plain',
+        :encryption => :starttls
       }
       # For test mail
       # delivery_method :test
     end
 
     Mail.deliver do |mail|
-      to config.gmail['to']
-      from config.gmail['from']
+      to config.mail[:user_name]
+      from config.mail[:user_name]
       subject "[#{config.app_name}] Manage Snapshot Error"
       body <<-EOF
 Manage Snapshot Error
