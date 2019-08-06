@@ -54,7 +54,8 @@ class ManageSnapshot
   def delete_snapshot(snapshots = select_snapshot_to_delete)
     puts '[INFO] Delete snapshots ...'
     snapshots.each do |snapshot|
-      snapshot.delete
+      puts "[DELETE] snapshot_id: #{snapshot.snapshot_id}"
+      ec2.delete_snapshot({snapshot_id: snapshot.snapshot_id})
     end
   end
 
