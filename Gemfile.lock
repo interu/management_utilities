@@ -236,7 +236,7 @@ GEM
     i18n (1.1.1)
       concurrent-ruby (~> 1.0)
     ipaddress (0.8.3)
-    jmespath (1.4.0)
+    jmespath (1.6.1)
     json (2.6.0)
     mail (2.7.1)
       mini_mime (>= 0.1.1)
