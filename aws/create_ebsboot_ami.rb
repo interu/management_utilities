@@ -5,7 +5,7 @@ require 'aws-sdk'
 require 'yaml'
 
 class CreateAmi
-  attr_accessor :instance_id, :region, :regist_key
+  attr_accessor :region, :regist_key
 
   def self.run
     self.new.run
@@ -14,7 +14,6 @@ class CreateAmi
   def initialize(opt = {})
     config = YAML.load(File.read('~/.config.yml'))
     @region      = opt[:region]        || config['aws']['region']
-    @instance_id = opt[:instance_id]   || config['ami']['instance_id']
     @regist_key  = opt[:regist_key]    || config['ami']['regist_key']
   end
 
