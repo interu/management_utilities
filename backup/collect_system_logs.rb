@@ -5,28 +5,22 @@
 # Set backup schedule 06:00am
 #     logrotate.d/syslog daily
 
-require 'constellation'
-
-class MyConfiguration
-  Constellation.enhance self
-  self.config_file = "~/.config.yml"
-end
-
 timestamp = Date.today.strftime('%Y%m%d')
-config = MyConfiguration.new
+config = YAML.load(File.read('~/.config.yml'))
 
 Storage::S3.defaults do |s3|
   s3.use_iam_profile = true
 end
 
+mail_setting = config['mail']
 Notifier::Mail.defaults do |mail|
-  mail.from                 = config.mail['user_name']
-  mail.to                   = config.mail['to']
-  mail.address              = config.mail['address']
-  mail.port                 = config.mail['port']
-  mail.domain               = config.mail['address']
-  mail.user_name            = config.gmail['user_nam3']
-  mail.password             = config.gmail['password']
+  mail.from                 = mail_setting['user_name']
+  mail.to                   = mail_setting['to']
+  mail.address              = mail_setting['address']
+  mail.port                 = mail_setting['port']
+  mail.domain               = mail_setting['address']
+  mail.user_name            = mail_setting['user_name']
+  mail.password             = mail_setting['password']
   mail.authentication       = 'plain'
   mail.encryption           = :starttls
 end
