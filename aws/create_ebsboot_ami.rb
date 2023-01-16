@@ -2,26 +2,24 @@
 
 require 'rubygems'
 require 'aws-sdk'
-
-config = YAML.load(File.read('~/.config.yml'))
+require 'yaml'
 
 class CreateAmi
-  attr_accessor :access_key, :secret_key, :instance_id, :region, :regist_key
+  attr_accessor :instance_id, :region, :regist_key
 
   def self.run
     self.new.run
   end
 
   def initialize(opt = {})
-    @access_key  = opt[:access_key]    || config['aws']['access_key']
-    @secret_key  = opt[:secret_key]    || config['aws']['secret_key']
+    config = YAML.load(File.read('~/.config.yml'))
     @region      = opt[:region]        || config['aws']['region']
     @instance_id = opt[:instance_id]   || config['ami']['instance_id']
     @regist_key  = opt[:regist_key]    || config['ami']['regist_key']
   end
 
   def ec2
-    @ec2 ||= Aws::EC2::Client.new(access_key_id: access_key, secret_access_key: secret_key, region: region)
+    @ec2 ||= Aws::EC2::Client.new(region: region, credentials: Aws::InstanceProfileCredentials.new)
   end
 
   def run
@@ -48,6 +46,7 @@ if __FILE__ == $0
   rescue Exception => e
     puts "[ERROR] Detail:\n #{e.inspect}"
     require "mail"
+    config = YAML.load(File.read('~/.config.yml'))
 
     Mail.defaults do
       delivery_method :smtp, {
@@ -64,9 +63,9 @@ if __FILE__ == $0
     end
 
     Mail.deliver do |mail|
-      to config['mail'][:user_name]
-      from config['mail'][:user_name]
-      subject "[#{config.app_name}] Manage Snapshot Error"
+      to config['mail']['to']
+      from config['mail']['from']
+      subject "[#{config['app_name']}] Manage Snapshot Error"
       body <<-EOF
 Manage Snapshot Error
 
