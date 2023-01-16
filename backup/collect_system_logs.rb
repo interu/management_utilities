@@ -52,8 +52,8 @@ Backup::Model.new(:system, 'system log buckup') do
   compress_with Gzip
 
   store_with S3 do |s3|
-    s3.region             = config.aws['region']
-    s3.bucket             = config.s3['bucket']
+    s3.region             = config['aws']['region']
+    s3.bucket             = config['s3']['bucket']
     s3.path               = '/backups'
     # s3.keep               = 365 * 5
   end
