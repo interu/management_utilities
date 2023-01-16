@@ -4,7 +4,6 @@ Encoding.default_external = Encoding::UTF_8
 
 gem 'aws-sdk', '~> 2'
 gem 'activesupport'
-gem 'constellation', '0.1.1'
 gem 'mail'
 gem 'backup', '5.0.0.beta.3'
 gem 'net-ssh'
