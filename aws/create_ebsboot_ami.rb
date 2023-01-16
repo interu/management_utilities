@@ -2,13 +2,8 @@
 
 require 'rubygems'
 require 'aws-sdk'
-require 'active_support/time'
-require 'constellation'
 
-class MyConfiguration
-  Constellation.enhance self
-  self.config_file = "~/.config.yml"
-end
+config = YAML.load(File.read('~/.config.yml'))
 
 class CreateAmi
   attr_accessor :access_key, :secret_key, :instance_id, :region, :regist_key
@@ -18,12 +13,11 @@ class CreateAmi
   end
 
   def initialize(opt = {})
-    config = MyConfiguration.new
-    @access_key  = opt[:access_key]    || config.aws['access_key']
-    @secret_key  = opt[:secret_key]    || config.aws['secret_key']
-    @region      = opt[:region]        || config.aws['region']
-    @instance_id = opt[:instance_id]   || config.ami['instance_id']
-    @regist_key  = opt[:regist_key]    || config.ami['regist_key']
+    @access_key  = opt[:access_key]    || config['aws']['access_key']
+    @secret_key  = opt[:secret_key]    || config['aws']['secret_key']
+    @region      = opt[:region]        || config['aws']['region']
+    @instance_id = opt[:instance_id]   || config['ami']['instance_id']
+    @regist_key  = opt[:regist_key]    || config['ami']['regist_key']
   end
 
   def ec2
@@ -49,7 +43,6 @@ class CreateAmi
 end
 
 if __FILE__ == $0
-  config = MyConfiguration.new
   begin
     CreateAmi.run
   rescue Exception => e
@@ -58,11 +51,11 @@ if __FILE__ == $0
 
     Mail.defaults do
       delivery_method :smtp, {
-        :address => config.mail['address'],
-        :port => config.mail['port'],
-        :domain => config.mail['address'],
-        :user_name => config.mail['user_name'],
-        :password => config.mail['password'],
+        :address => config['mail']['address'],
+        :port => config['mail']['port'],
+        :domain => config['mail']['address'],
+        :user_name => config['mail']['user_name'],
+        :password => config['mail']['password'],
         :authentication => 'plain',
         :encryption => :starttls
       }
@@ -71,8 +64,8 @@ if __FILE__ == $0
     end
 
     Mail.deliver do |mail|
-      to config.mail[:user_name]
-      from config.mail[:user_name]
+      to config['mail'][:user_name]
+      from config['mail'][:user_name]
       subject "[#{config.app_name}] Manage Snapshot Error"
       body <<-EOF
 Manage Snapshot Error
